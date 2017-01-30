@@ -8,9 +8,11 @@ import android.graphics.Paint;
 import android.support.annotation.ColorInt;
 import android.support.annotation.ColorRes;
 import android.support.annotation.DrawableRes;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.AppCompatEditText;
 import android.text.TextPaint;
 import android.util.AttributeSet;
+import android.util.Log;
 
 /**
  * Created by Belichenko Anton on 25.01.17.
@@ -19,9 +21,10 @@ import android.util.AttributeSet;
 
 public class MaskedEditText extends AppCompatEditText {
 
-    private int currentLength;
-    private int defaultLength = 4;
-    private String defaultSymbol = "0";
+    private static final int DEFAULT_LENGTH = 4;
+    private static final String DEFAULT_SYMBOL = "0";
+
+    private int mCurrentLength;
     private Paint mPaint = new Paint();
     private int mColor;
     private int mDrawable;
@@ -29,33 +32,35 @@ public class MaskedEditText extends AppCompatEditText {
 
     public MaskedEditText(Context context) {
         super(context);
+        mCurrentLength = DEFAULT_LENGTH;
         init();
     }
 
     public MaskedEditText(Context context, AttributeSet attrs) {
         super(context, attrs);
-        currentLength = attrs.getAttributeIntValue("http://schemas.android.com/apk/res/android", "maxLength", defaultLength);
+        //set the max length or DEFAULT_LENGTH if parameter maxLength not determined in xml
+        mCurrentLength = attrs.getAttributeIntValue("http://schemas.android.com/apk/res/android", "maxLength", DEFAULT_LENGTH);
         init();
     }
 
     public MaskedEditText(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        currentLength = attrs.getAttributeIntValue("http://schemas.android.com/apk/res/android", "maxLength", defaultLength);
+        mCurrentLength = attrs.getAttributeIntValue("http://schemas.android.com/apk/res/android", "maxLength", DEFAULT_LENGTH);
         init();
     }
 
-    public
     @ColorInt
-    int getPointColor() {
+    public int getPointColor() {
         return mColor;
     }
 
     public void setPointColor(@ColorRes int color) {
         mColor = color;
-        int myColor = getContext().getResources().getColor(mColor);
+        int myColor = ContextCompat.getColor(getContext(), mColor);
         mPaint.setColor(myColor);
     }
 
+    @DrawableRes
     public int getPointDrawable() {
         return mDrawable;
     }
@@ -66,20 +71,23 @@ public class MaskedEditText extends AppCompatEditText {
         BitmapFactory.Options option = new BitmapFactory.Options();
         option.inScaled = false;
         mBitmap = BitmapFactory.decodeResource(getResources(), mDrawable, option);
-//        if (this.getMeasuredHeight() < mBitmap.getHeight()){
-//            Log.d("Tag", "Drawable height is over more = " + String.valueOf(mBitmap.getHeight()));
-//            mBitmap = null;
-//            mDrawable = 0;
-//        }
+        super.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
+        int viewHeight = this.getMeasuredHeight();
+        Log.d("Tag", "View height = " + String.valueOf(viewHeight));
+        if (viewHeight > 0 && viewHeight < mBitmap.getHeight()){
+            Log.d("Tag", "Drawable height is over more = " + String.valueOf(mBitmap.getHeight()));
+            mBitmap = Bitmap.createScaledBitmap(mBitmap, viewHeight / 4, viewHeight / 4, false);
+        }
+
     }
 
     private void init() {
         setMaxLines(1);
         setSingleLine(true);
-        setMinEms(currentLength);
-        setMaxEms(currentLength);
-        setEms(currentLength);
-        int myColor = getContext().getResources().getColor(R.color.colorAccent);
+        setMinEms(mCurrentLength);
+        setMaxEms(mCurrentLength);
+        setEms(mCurrentLength);
+        int myColor = ContextCompat.getColor(getContext(), R.color.colorAccent);
         mPaint.setColor(myColor);
     }
 
@@ -87,21 +95,26 @@ public class MaskedEditText extends AppCompatEditText {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        //Layout layout = getLayout();
         TextPaint textPaint = getPaint();
+        // calculating point size from current font size
         float pointSize = textPaint.getTextSize() / 6.0f;
         float symbolsLengths;
         float leftPadding = (float) getPaddingLeft();
+        // getting the symbol length from real text or from default symbol if text is empty
         if (length() > 0) {
-            symbolsLengths = textPaint.measureText(length() > 0 ? getText().toString() : defaultSymbol, 0, length() > 0 ? length() : 1);
+            symbolsLengths = textPaint.measureText(length() > 0 ? getText().toString() : DEFAULT_SYMBOL, 0, length() > 0 ? length() : 1);
         } else {
             symbolsLengths = 0.0f;
         }
-        float oneSymbolLength = textPaint.measureText(defaultSymbol);
+        float oneSymbolLength = textPaint.measureText(DEFAULT_SYMBOL);
         int centerY = getHeight() / 2;
-        for (int i = length(); i < currentLength; i++) {
+        // drawing points or bitmaps after the padding and text
+        for (int i = length(); i < mCurrentLength; i++) {
             if (mBitmap != null) {
-                canvas.drawBitmap(mBitmap, leftPadding + symbolsLengths + oneSymbolLength * (float) (i - length()) + oneSymbolLength / 1.5f, centerY, mPaint);
+                int halfOfBitmapHeigth = mBitmap.getHeight() / 2;
+                int halfOfBitmapWidth = mBitmap.getWidth() / 2;
+                canvas.drawBitmap(mBitmap, leftPadding + symbolsLengths + oneSymbolLength * (float) (i - length()) + oneSymbolLength / 1.5f - halfOfBitmapWidth
+                        , centerY - halfOfBitmapHeigth, mPaint);
             } else {
                 canvas.drawCircle(leftPadding + symbolsLengths + oneSymbolLength * (float) (i - length()) + oneSymbolLength / 1.5f, centerY, pointSize, mPaint);
             }
