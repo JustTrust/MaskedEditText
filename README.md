@@ -1,5 +1,5 @@
 # Masked edit text
-This is example of a masked edit text. It has predefined text length and shows how many symbols user should input.
+This is example of a custom view. Masked edit text has predefined text length and shows how many symbols user should input.
 You should determine maxLength parameter in xml, by default it will be set on 4.
 By default it draws a accent color dots in the place where should be letters.
 But you can change dots color with ```setPointColor()```.
