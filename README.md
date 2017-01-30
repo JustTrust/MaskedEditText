@@ -5,6 +5,11 @@ By default it draws a accent color dots in the place where should be letters.
 But you can change dots color with ```setPointColor()```.
 Also you could set your custom drawable from resources with ```setPointDrawable()```.
 Drawable size will be resized automatically to a view height.
+
+![Blank texts](/app/src/main/assets/screen1.png?raw=true "Blank texts")
+
+![Filed texts](/app/src/main/assets/screen2.png?raw=true "Filed texts")
+
 ##License
 
     Copyright 2016 JustTrust
