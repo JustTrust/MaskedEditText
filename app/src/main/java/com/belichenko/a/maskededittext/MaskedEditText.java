@@ -10,6 +10,7 @@ import android.support.annotation.ColorRes;
 import android.support.annotation.DrawableRes;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.AppCompatEditText;
+import android.text.InputFilter;
 import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -87,6 +88,7 @@ public class MaskedEditText extends AppCompatEditText {
         setMinEms(mCurrentLength);
         setMaxEms(mCurrentLength);
         setEms(mCurrentLength);
+        setFilters(new InputFilter[]{new InputFilter.LengthFilter(mCurrentLength)});
         int myColor = ContextCompat.getColor(getContext(), R.color.colorAccent);
         mPaint.setColor(myColor);
     }

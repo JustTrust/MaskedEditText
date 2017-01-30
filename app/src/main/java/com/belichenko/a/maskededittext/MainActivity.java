@@ -15,8 +15,8 @@ public class MainActivity extends AppCompatActivity {
         MaskedEditText mEditText3 = (MaskedEditText) findViewById(R.id.third);
         MaskedEditText mEditText4 = (MaskedEditText) findViewById(R.id.quart);
 
-        mEditText4.setPointColor(R.color.colorPoint);
         mEditText2.setPointDrawable(R.drawable.plus256);
-        mEditText1.setPointDrawable(R.drawable.icon256);
+        mEditText3.setPointDrawable(R.drawable.piq_4);
+        mEditText4.setPointColor(R.color.colorPoint);
     }
 }
